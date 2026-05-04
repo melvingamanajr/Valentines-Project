@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine - Romantic Surprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fce4ec;
+            --env-color: #f44336;
+            --env-inner: #d32f2f;
+            --bear-brown: #a67c52;
+            --bear-light: #d7b899;
+            --bear-dark: #2c1e14;
+            --flower-pink: #ff80ab;
+            --flower-red: #ff1744;
+            --leaf-green: #4caf50;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Playfair Display', serif;
+            perspective: 1000px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- MODAL STYLES --- */
+        #modalOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 450px;
+            border: 3px solid var(--flower-pink);
+        }
+
+        .modal h2 { color: var(--env-inner); margin-top: 0; font-family: 'Dancing Script', cursive; font-size: 36px; }
+        .modal p.sub { color: #888; font-style: italic; margin-bottom: 20px; }
+
+        .modal input, .modal textarea {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid var(--flower-pink);
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+        }
+        
+        .modal textarea { height: 120px; resize: none; }
+
+        .modal button {
+            background: var(--env-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .modal button:hover { background: var(--env-inner); transform: scale(1.05); }
+
+        #copyArea { display: none; margin-top: 20px; }
+        #shareLink { font-size: 12px; color: #666; word-break: break-all; background: #fdf0f4; padding: 10px; border: 1px dashed var(--flower-pink); border-radius: 5px; }
+
+        /* --- RESET FOOTER BUTTON --- */
+        #resetBtn {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 25px;
+            background: white;
+            color: var(--env-inner);
+            border: 2px solid var(--env-inner);
+            border-radius: 30px;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        #resetBtn.visible { opacity: 1; pointer-events: auto; }
+
+        /* --- HEART BURST ANIMATION --- */
+        .heart-particle {
+            position: absolute;
+            color: var(--flower-red);
+            font-size: 20px;
+            pointer-events: none;
+            z-index: 15;
+            animation: floatUp 2s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-200px) rotate(45deg) scale(0); opacity: 0; }
+        }
+
+        /* --- ENVELOPE & GAME --- */
+        #instruction {
+            position: absolute;
+            top: 10%;
+            font-family: 'Dancing Script', cursive;
+            font-size: 32px;
+            color: var(--env-inner);
+            z-index: 20;
+            pointer-events: none;
+            text-align: center;
+            text-shadow: 2px 2px white;
+        }
+
+        .envelope-wrapper {
+            position: absolute;
+            width: 300px;
+            height: 200px;
+            transform-style: preserve-3d;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 10;
+            display: none;
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%; height: 100%;
+            background-color: var(--env-inner);
+        }
+
+        .envelope::before {
+            content: "";
+            position: absolute;
+            top: 0; z-index: 4;
+            border-top: 130px solid var(--env-color);
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            transform-origin: top;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .envelope::after {
+            content: "";
+            position: absolute;
+            bottom: 0; z-index: 5;
+            border-top: 100px solid transparent;
+            border-left: 150px solid var(--env-color);
+            border-right: 150px solid var(--env-color);
+            border-bottom: 100px solid var(--env-color);
+        }
+
+        /* --- FLOWERS --- */
+        .bouquet { position: absolute; bottom: 20px; width: 120px; height: 120px; z-index: 2; opacity: 0; transition: all 0.7s ease; }
+        .bouquet.left { left: -20px; }
+        .bouquet.right { right: -20px; }
+
+        .flower-unit { position: absolute; width: 50px; display: flex; flex-direction: column; align-items: center; }
+        .flower-head { position: relative; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; }
+        .petal { position: absolute; background: var(--flower-pink); width: 18px; height: 25px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; top: 50%; left: 50%; transform-origin: 50% 100%; z-index: 1; }
+        .p1 { transform: translate(-50%, -100%) rotate(0deg); }
+        .p2 { transform: translate(-50%, -100%) rotate(60deg); }
+        .p3 { transform: translate(-50%, -100%) rotate(120deg); }
+        .p4 { transform: translate(-50%, -100%) rotate(180deg); }
+        .p5 { transform: translate(-50%, -100%) rotate(240deg); }
+        .p6 { transform: translate(-50%, -100%) rotate(300deg); }
+        .center-dot { position: absolute; width: 12px; height: 12px; background: #ffeb3b; border-radius: 50%; z-index: 10; }
+        .stem { width: 5px; height: 60px; background: var(--leaf-green); margin-top: -25px; z-index: -1; border-radius: 3px; }
+        .f-red .petal { background: var(--flower-red); }
+        .pos1 { top: 15px; left: 35px; z-index: 3; }
+        .pos2 { top: 45px; left: -5px; transform: rotate(-15deg); z-index: 2; }
+        .pos3 { top: 45px; left: 75px; transform: rotate(15deg); z-index: 2; }
+
+        /* --- RESPONSIVE CARD --- */
+        .card {
+            position: absolute;
+            bottom: 10px; left: 10px;
+            width: 280px; 
+            max-height: 250px;
+            z-index: 3;
+            background: #fff;
+            border-radius: 5px;
+            transform: rotateX(-90deg);
+            transform-origin: bottom;
+            transition: all 0.6s ease;
+            opacity: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 1px solid #eee;
+            overflow-y: auto;
+            display: block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .text { 
+            color: var(--env-inner); 
+            font-family: 'Dancing Script', cursive; 
+            font-size: 22px; 
+            line-height: 1.5;
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        /* --- BEAR --- */
+        .bear { position: absolute; top: 50%; left: 50%; width: 80px; height: 70px; z-index: 10; transform: translate(-50%, -40%); pointer-events: none; }
+        .face { position: absolute; width: 80px; height: 70px; background: var(--bear-brown); border-radius: 50% 50% 45% 45%; }
+        .ears::before, .ears::after { content: ""; position: absolute; width: 25px; height: 25px; background: var(--bear-brown); border-radius: 50%; top: -5px; }
+        .ears::before { left: 5px; } .ears::after { right: 5px; }
+        .eyes::before, .eyes::after { content: ""; position: absolute; width: 8px; height: 8px; background: var(--bear-dark); border-radius: 50%; top: 25px; }
+        .eyes::before { left: 22px; } .eyes::after { right: 22px; }
+        .nose-area { position: absolute; width: 24px; height: 18px; background: var(--bear-light); border-radius: 50%; bottom: 12px; left: 50%; transform: translateX(-50%); }
+        .nose-tip { position: absolute; width: 8px; height: 5px; background: var(--bear-dark); border-radius: 50%; top: 3px; left: 50%; transform: translateX(-50%); }
+
+        /* Active State */
+        .active .envelope::before { transform: rotateX(180deg); z-index: 0; }
+        .active .card { transform: translateY(-170px) rotateX(0deg); opacity: 1; z-index: 6; }
+        .active .bouquet.left { transform: translate(-105px, -115px) rotate(-12deg); opacity: 1; }
+        .active .bouquet.right { transform: translate(105px, -115px) rotate(12deg); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div id="modalOverlay">
+        <div class="modal">
+            <h2>Spread the Love ❤️</h2>
+            <p class="sub">Create a romantic catch-the-bear game for your special someone!</p>
+            <div id="formArea">
+                <input type="text" id="nameInput" placeholder="Name of your Valentine...">
+                <textarea id="msgInput" placeholder="Write something romantic... (e.g., Every second with you feels like a dream I never want to wake up from.)"></textarea>
+                <br>
+                <button onclick="generateLink()">Seal with a Kiss 💋</button>
+            </div>
+            <div id="copyArea">
+                <p>Your romantic surprise is ready!</p>
+                <div id="shareLink"></div>
+                <br>
+                <button onclick="copyToClipboard()">Copy & Send Link</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="instruction" style="display:none;">Catch my heart if you can! ❤️</div>
+
+    <audio id="popSound" src="assets/card-flip.mp3"></audio>
+    <audio id="flySound" src="assets/woosh.mp3" loop></audio>
+    <audio id="romanticSound" src="assets/romantic-keys.mp3" loop></audio>
+
+    <div class="envelope-wrapper" id="valentineEnvelope">
+        <div class="envelope">
+            <div class="bouquet left" id="bL"></div>
+            <div class="bouquet right" id="bR"></div>
+            <div class="card">
+                <div class="text">
+                    Happy Valentine's Day,<br><strong id="recipientName">Beautiful</strong>! ❤️
+                    <br><br>
+                    <span id="customMessage"></span>
+                </div>
+            </div>
+        </div>
+        <div class="bear">
+            <div class="face"><div class="ears"></div><div class="eyes"></div><div class="nose-area"><div class="nose-tip"></div></div></div>
+        </div>
+    </div>
+
+    <button id="resetBtn" onclick="resetToHome()">Create Another Card</button>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const nameParam = urlParams.get('name');
+        const msgParam = urlParams.get('msg');
+        
+        const envelope = document.getElementById('valentineEnvelope');
+        const modal = document.getElementById('modalOverlay');
+        const recipientName = document.getElementById('recipientName');
+        const customMessage = document.getElementById('customMessage');
+        const instruction = document.getElementById('instruction');
+        const flySound = document.getElementById('flySound');
+        const romanticSound = document.getElementById('romanticSound');
+        const popSound = document.getElementById('popSound');
+        const resetBtn = document.getElementById('resetBtn');
+
+        const inputs = document.querySelectorAll('#formArea input, #formArea textarea');
+        inputs.forEach(input => {
+            input.addEventListener('mouseover', () => {
+                // We play it only if it's paused to avoid restarting it constantly
+                if (romanticSound.paused) {
+                    romanticSound.play().catch(e => console.log("Audio play blocked until user interaction."));
+                }
+            });
+        });
+
+        if (nameParam) {
+            modal.style.display = 'none';
+            envelope.style.display = 'block';
+            instruction.style.display = 'block';
+            recipientName.innerText = nameParam;
+            if(msgParam) customMessage.innerText = decodeURIComponent(msgParam);
+            initGame();
+        }
+
+        function generateLink() {
+            const name = document.getElementById('nameInput').value;
+            const msg = document.getElementById('msgInput').value;
+            if(!name || !msg) return alert("Don't forget the name and message!");
+            const baseUrl = window.location.href.split('?')[0];
+            const finalUrl = `${baseUrl}?name=${encodeURIComponent(name)}&msg=${encodeURIComponent(msg)}`;
+            document.getElementById('shareLink').innerText = finalUrl;
+            document.getElementById('formArea').style.display = 'none';
+            document.getElementById('copyArea').style.display = 'block';
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(document.getElementById('shareLink').innerText).then(() => {
+                alert("Copied! Go send it to your love. ❤️");
+            });
+        }
+
+        function createHearts() {
+            for(let i=0; i<15; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '❤️';
+                    heart.className = 'heart-particle';
+                    heart.style.left = (Math.random() * 200 + 50) + 'px';
+                    heart.style.top = '100px';
+                    envelope.appendChild(heart);
+                    setTimeout(() => heart.remove(), 2000);
+                }, i * 100);
+            }
+        }
+
+        function resetToHome() {
+            window.location.href = window.location.pathname;
+        }
+
+        function createFlowerUnit(cls) {
+            return `<div class="flower-unit ${cls}"><div class="flower-head">
+                <div class="petal p1"></div><div class="petal p2"></div>
+                <div class="petal p3"></div><div class="petal p4"></div>
+                <div class="petal p5"></div><div class="petal p6"></div>
+                <div class="center-dot"></div></div><div class="stem"></div></div>`;
+        }
+
+        function initGame() {
+            romanticSound.pause();
+            const flowers = createFlowerUnit("f-red pos1") + createFlowerUnit("pos2") + createFlowerUnit("pos3");
+            document.getElementById('bL').innerHTML = flowers;
+            document.getElementById('bR').innerHTML = flowers;
+
+            window.addEventListener('mousemove', () => flySound.play().catch(()=>{}), {once:true});
+
+            let isCaught = false;
+            let moveInterval = setInterval(() => {
+                if(isCaught) return;
+                const x = Math.random() * (window.innerWidth - 300) + 150;
+                const y = Math.random() * (window.innerHeight - 200) + 100;
+                envelope.style.left = x + 'px';
+                envelope.style.top = y + 'px';
+                envelope.style.transform = `translate(-50%, -50%) rotate(${Math.random()*40-20}deg)`;
+            }, 1000);
+
+            envelope.addEventListener('click', () => {
+                if(isCaught) return envelope.classList.toggle('active');
+                isCaught = true;
+                clearInterval(moveInterval);
+                flySound.pause();
+                romanticSound.play();
+                instruction.style.display = 'none';
+                envelope.style.left = '50%'; envelope.style.top = '50%';
+                envelope.style.transform = 'translate(-50%, -50%)';
+                
+                setTimeout(() => {
+                    envelope.classList.add('active');
+                    popSound.play();
+                    createHearts(); // Trigger the romantic hearts!
+                    resetBtn.classList.add('visible');
+                }, 800);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+:root {
+    --bg-color: #fce4ec;
+    --env-color: #f44336;
+    --env-inner: #d32f2f;
+    --card-color: #fff;
+}
+
+body {
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Envelope Container */
+.envelope-wrapper {
+    position: relative;
+    cursor: pointer;
+}
+
+.envelope {
+    position: relative;
+    width: 300px;
+    height: 200px;
+    background-color: var(--env-inner);
+}
+
+/* The Flap */
+.envelope::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    border-top: 130px solid var(--env-color);
+    border-left: 150px solid transparent;
+    border-right: 150px solid transparent;
+    transform-origin: top;
+    transition: all 0.5s ease-in-out;
+}
+
+/* The Pocket */
+.envelope::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    z-index: 2;
+    border-top: 100px solid transparent;
+    border-left: 150px solid var(--env-color);
+    border-right: 150px solid var(--env-color);
+    border-bottom: 100px solid var(--env-color);
+}
+
+/* The Card inside */
+.card {
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    width: 280px;
+    height: 180px;
+    background: var(--card-color);
+    z-index: 1;
+    transition: all 0.5s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.text {
+    font-family: 'Arial', sans-serif;
+    color: #d32f2f;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/* The Heart Sticker */
+.heart {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    z-index: 4;
+    transform: translate(-50%, -20%) rotate(45deg);
+    transition: transform 0.5s ease-in-out;
+}
+
+.heart::before, .heart::after {
+    content: "";
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+}
+
+.heart::before { top: -15px; left: 0; }
+.heart::after { left: -15px; top: 0; }
+
+/* Animation on Click */
+.envelope-wrapper.active .envelope::before {
+    transform: rotateX(180deg);
+    z-index: 0;
+}
+
+.envelope-wrapper.active .card {
+    transform: translateY(-100px);
+}
+
+.envelope-wrapper.active .heart {
+    transform: translate(-50%, -150%) rotate(45deg);
+    opacity: 0;
+}
+
+/* The Bear Seal */
+.bear {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 70px;
+    z-index: 4;
+    transform: translate(-50%, -20%); /* Centered on the flap */
+    transition: all 0.5s ease-in-out;
+}
+
+.face {
+    position: absolute;
+    width: 80px;
+    height: 70px;
+    background: #a67c52;
+    border-radius: 50% 50% 45% 45%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Ears */
+.ears::before, .ears::after {
+    content: "";
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background: #a67c52;
+    border-radius: 50%;
+    top: -5px;
+}
+.ears::before { left: 5px; }
+.ears::after { right: 5px; }
+
+/* Eyes */
+.eyes::before, .eyes::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #2c1e14;
+    border-radius: 50%;
+    top: 25px;
+}
+
+.eyes::before { left: 20px; }
+.eyes::after { right: 20px; }
+
+/* Muzzle/Nose Area */
+.nose {
+    position: absolute;
+    width: 25px;
+    height: 20px;
+    background: #d7b899; /* Lighter snout */
+    border-radius: 50%;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.nose::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 6px;
+    background: #2c1e14;
+    border-radius: 50%;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Adjusting the text so it doesn't overlap the bear too much */
+.text {
+    padding-top: 40px;
+    font-size: 18px;
+}
+
